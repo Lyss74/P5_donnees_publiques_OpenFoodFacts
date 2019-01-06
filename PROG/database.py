@@ -13,6 +13,8 @@ class DataBaseCreator:
     def __init__(self):
         pass
 
+    # -tc-utiliser des verbes d'action pour les méthodes, comme create_category_table, create_store_table, 
+    # -tc- create_product_store_table(), create_database(), drop_database(), etc.
     def c_table(self):
         pass
 
