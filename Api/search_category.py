@@ -12,10 +12,6 @@ from Config import constants as cons
 class ApiCollectingData:
     """ Call the Api Open Food Fact """
 
-    def __init__(self):
-        """ The constructor init the criteria """
-
-
 # self.key = (barre_code, name, grade, website, format_categories.upper(), store)
 
     def bring_out(self):
@@ -28,7 +24,7 @@ class ApiCollectingData:
                       "tagtype_0": "categories",                                            # Get the result by category
                       'tag_0': category,                                         # the tag represents the article search
                       "tag_contains_0": "contains",
-                      "page_size": 5,                                                     # Number of articles per page
+                      "page_size": 50,                                                     # Number of articles per page
                       "json": 1}                                                              # The API response in JSON
 
             response = req.get(api, params=config)                           # Uses the configuration for the connection
@@ -85,9 +81,12 @@ class ApiCollectingData:
 
 def main():
 
-    name = ApiCollectingData()
-    connect = name.bring_out()
-    final = name.format_final_response(connect)
+    downloader = ApiCollectingData()
+    connect = downloader.bring_out()
+    final = tuple(downloader.format_final_response(connect))
+
+    pprint(final)
+    print(f"Nous avons récupéré {len(final)} produits")
 
     #convert = name.convert_type_final(final)
     # save_in_file = call.save_data(final , 'output_data_save.csv')
