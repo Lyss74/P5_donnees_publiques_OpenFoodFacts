@@ -52,16 +52,16 @@ class DataBaseUser:
                                 SELECT * FROM demo.Products;
                              """,  fetchall=True).as_dict()
 
-    def get_all_products_per_category(self, select_1):
+    def get_all_products_per_category(self, category):
         """ Control in the tables """
-        cat = self.db.query(""" 
-                                SELECT product.name_product FROM Products AS product      
+        cat = self.db.query("""
+                                SELECT * FROM Products AS product
                                 JOIN products_categories_summary_key AS pc ON pc.product_id = product.barre_code  
                                 JOIN Categories_summary AS c ON pc.c_category_id = c.id							
                                 WHERE c.c_category = :user;	
-                            """, user=select_1, fetchall=True).as_dict()
+                            """, user=category, fetchall=True).as_dict()
 
-        return [(i, p['name_product']) for i, p in enumerate(cat)]
+        return cat
 
     def get_product_in_category(self, select_2):
         prod = self.db.query("""
@@ -70,6 +70,16 @@ class DataBaseUser:
                              """, user=select_2, fetchall=True).as_dict()
 
         return [(i, p['name_product'], p['grade'], p['barre_code']) for i, p in enumerate(prod)]
+
+    def get_healthier_product_in_category(self, category, product):
+        prod = self.db.query("""
+                             SELECT * FROM Products AS product
+                             JOIN Products_categories_summary_key AS pcsk ON pcsk.product_id = product.barre_code
+                             JOIN Categories_summary AS cs ON cs.id = pcsk.c_category_id
+                             WHERE product.grade < :grade AND cs.c_category = :category
+                             """, 
+                            grade=product['grade'], category=category, fetchall=True).as_dict()
+        return prod
 
 
 #        prod = self.db.query("""
