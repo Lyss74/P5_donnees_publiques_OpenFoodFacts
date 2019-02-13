@@ -3,6 +3,7 @@
 
 from time import sleep
 import csv
+import random
 
 from Config.constants import *
 from Database.database_user import DataBaseUser
@@ -28,38 +29,37 @@ class Main:
               "*'N' pour crèer une Nouvelle base de donnèes", '\n',
               "*'Q' pour Quiter", '\n')
         user = input()
-        if user.isdigit():
+        key_list = ["R", "F", "G", "C", "D", "N", "Q"]
+        # -tc- utilise des elifs. Je ne comprends pas pourquqoi toutes ces options
+        if user not in key_list:
             self.home_menu()
-        else:
-            key_list = ["R", "F", "G", "C", "D", "N", "Q"]
-            if user not in key_list:
-                self.home_menu()
-            if user == 'R':
-                self.step_1()
-            if user == 'F':
-                    # self.database.get_favorites(user)
-                self.home_menu()
-            if user == 'G':
-                    # self.database.get_databases()
-                self.home_menu()
-            if user == 'C':
-                    # self.database.use_database(user)
-                self.home_menu()
-            if user == 'D':
-                    # self.database.drop_database(user)
-                self.home_menu()
-            if user == 'N':
-                    # self.database.create_database(user)
-                self.home_menu()
-                for base in enumerate(SEASON_DATABASES):
-                    print(base)
-            if user == 'Q':
-                quit()
+        elif user == 'R':
+            self.step_1()
+        elif user == 'F':
+                # self.database.get_favorites(user)
+            self.home_menu()
+        elif user == 'G':
+                # self.database.get_databases()
+            self.home_menu()
+        elif user == 'C':
+            # self.database.use_database(user)
+            self.home_menu()
+        elif user == 'D':
+            # self.database.drop_database(user)
+            self.home_menu()
+        elif user == 'N':
+            # self.database.create_database(user)
+            self.home_menu()
+            for base in enumerate(SEASON_DATABASES):
+                print(base)
+        elif user == 'Q':
+            quit()
 
     def step_1(self):
         """ Choice Category """
         select_1 = self.value_error(self.step_1_action)
         print(" |*** vous avez choisis ***| :  ", select_1.capitalize())
+        # -tc- Pourquoi ralentir le programme?
         sleep(0.5)
         self.step_2(select_1)
 
@@ -69,40 +69,44 @@ class Main:
         user = input(" |*** Pour choisir une categorie, tapez le chiffre associé et appuyer sur ENTREE ***| ")
         return CATEGORIES[int(user)]
 
-    def step_2_(self):
-        select_2 = self.value_error(self.step_2_action)
-        print(" |*** vous avez choisis ***| :  ", select_2[1].capitalize())
+    def step_2(self, select_1):
+        # -tc- ajouter select_1 dans l'appel à self.value_error
+        select_2 = self.value_error(self.step_2_action, select_1)
+        print(" |*** vous avez choisis ***| :  ", select_2['name_product'].capitalize())
+        # -tc- sleep() à éliminer
         sleep(0.5)
-        self.step_3(select_2[1])
+        # -tc- Pourquoi ne passer uniquement select_2[1] au step suivant?
+        # -tc- C'est une bonne idée de passer select_1 et select_2 à step_3
+        self.step_3(select_1, select_2)
+
     def step_2_action(self, select_1):
         products = self.database.get_all_products_per_category(str(select_1))
-        for select in products:
-            print("*", select)
+        for i, select in enumerate(products):
+            print(f"* ({i+1}, {select['name_product']})")
         user = input(" |*** Pour choisir un produit, tapez le chiffre associé et appuyer sur ENTREE ***| ")
-        return products[int(user)]
+        if '0' in user:
+            raise IndexError()
+        return products[int(user)-1]
 
-    def step_2(self, select_1):
-        """ Product choice """
-        products = self.database.get_all_products_per_category(str(select_1))
-        try:
-            for select in products:
-                print("*", select)
-            user = input(" |*** Pour choisir un produit, tapez le chiffre associé et appuyer sur ENTREE ***| ")
-            select_2 = products[int(user)]
-            print(" |*** vous avez choisis ***| :  ", select_2[1].capitalize())
-            sleep(0.5)
-        except ValueError:
-            print("ValueError - |*** /!\ Tapez le chiffre associé à un produit dans la liste /!\ ***|")
-            sleep(0.5)
-            self.step_2(select_1)
-        except IndexError:
-            print("IndexError - |*** /!\  Vous devez choisir un produit dans la liste /!\ ***|")
-            sleep(0.5)
-            self.step_2(select_1)
-        else:
-            self.step_3(select_2[1])
+    def step_3(self, select_1, select_2):
+        # -tc- ajouter select_1 dans l'appel à self.value_error
+        print("STEP 3")
+        select_3 = self.value_error(self.step_3_action, select_1, select_2)
+        # -tc- Afficher tout le détail du product sélectionné
+        self.final_use(select_1, select_2, select_3)
 
-    def step_3(self, select_2):
+
+    def step_3_action(self, select_1, select_2):
+        substitutes = self.database.get_healthier_product_in_category(select_1, select_2)
+        for i, select in enumerate(substitutes):
+            print(f"* ({i+1}, {select['name_product']})")
+        user = input(" |*** Pour choisir un substitut, tapez le chiffre associé et appuyer sur ENTREE ***| ")
+        if '0' in user:
+            raise IndexError()
+        return substitutes[int(user)-1]
+
+
+    def step_3_back(self, select_1, select_2):
         """ Substitute research """
         print("STEP 3")
         compare = self.database.get_product_in_category(str(select_2))
@@ -131,7 +135,7 @@ class Main:
             elif user == 'Q':
                 quit()
 
-    def final_use(self, select_2, select_3):
+    def final_use(self, select_1, select_2, select_3):
         print("FINAL USE")
         user = input("tapez:" '\n' 
                      "'O': pour Oui" '\n'
