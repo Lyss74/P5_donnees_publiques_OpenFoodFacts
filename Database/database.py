@@ -22,15 +22,19 @@ class DataBaseCreator:
 
     def drop_tables(self):
         """ Delete existing tables, to collect new data  """
+
+        # -tc- attention, ta base ne se nomme pas nécessairement purbeurre
+        # -tc- attention, utiliser if exists pour le cas où c'est la première
+        # -tc- création des tables
         self.db.query(""" 
-                        DROP TABLE 
-                        purbeurre.categories, 
-                        purbeurre.categories_summary, 
-                        purbeurre.products,
-                        purbeurre.products_categories_key,
-                        purbeurre.products_categories_summary_key,
-                        purbeurre.products_stores,
-                        purbeurre.stores;
+                        DROP TABLE if exists
+                        Categories, 
+                        Categories_summary, 
+                        Products,
+                        Products_categories_key,
+                        Products_categories_summary_key,
+                        Products_stores,
+                        Stores;
                       """)
 
     def create_table_product(self):
