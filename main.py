@@ -24,7 +24,7 @@ class Main:
         print("Tapez:", '\n',
               " |-'1': Quel aliment souhaitez-vous remplacer ?" '\n',
               " |-'2': Retrouver mes aliments substitués" '\n',
-              " |-'Q': Pour Quitter", '\n')
+              " |-'Q': Pour quitter", '\n')
         user = input()
         key_list = ["1", "2", "Q"]
         if user not in key_list:
@@ -36,7 +36,7 @@ class Main:
             elif user == '2':
                 self.database.get_favorite_table()
             elif user == 'Q':
-                quit()
+                self.quit()
 
     def choice_category(self):
         """ Choice Category """
@@ -84,7 +84,7 @@ class Main:
             print(f"* ({i + 1}, {select['barcode']}, {select['name_product']}, {select['grade']})")
         user = input('\n' " | Vous pouvez choisir un produits" '\n'
                      " |-tapez le chiffre associé et appuyer sur ENTREE" '\n'
-                     " |-'Q' pour Quitter" '\n'
+                     " |-'Q' pour quitter" '\n'
                      " |-'H' retour au Menu" '\n')
         if user.isdigit():
             select_substitute = substitutes[int(user) - 1]
@@ -95,13 +95,15 @@ class Main:
         else:
             key_list = ["C", "H", "Q"]
             if user not in key_list:
-                self.choice_substitute_action(select_category, select_product)
+                # -tc- retour à choice_substitute, et non choice_substitute_action
+                self.choice_substitute(select_category, select_product)
             elif user == 'C':
-                self.choice_substitute_action(select_category, select_product)
+                # -tc- retour à choice_substitute, et non choice_substitute_action
+                self.choice_substitute(select_category, select_product)
             elif user == 'H':
                 self.home_menu()
             elif user == 'Q':
-                quit()
+                self.quit()
         return substitutes[int(user)]
 
     def choose_favorite_final(self, select_category, select_product, select_substitute):
@@ -111,7 +113,7 @@ class Main:
                      " |-'N': pour Non" '\n' 
                      " |-'C': pour Choisir un nouveau produit" '\n' 
                      " |-'H': retour au Menu" '\n'
-                     " |-'Q': pour Quitter, valider avec ENTREE" '\n')
+                     " |-'Q': pour quitter, valider avec ENTREE" '\n')
         if user.isdigit():
             print('\n', conf.SPACE_ADJUST,  conf.INDEX_ERROR, '\n')
             self.choose_favorite_final(select_category, select_product, select_substitute)
@@ -122,6 +124,9 @@ class Main:
                 self.choose_favorite_final(select_category, select_product, select_substitute)
 
             elif user == 'O':
+                # -tc- pourquoi un ajout temporaire à une liste? Tu peux directement ajoute
+                # -tc- à la base
+                # -tc self.database.add_into_favorites(select_product, select_substitute)
                 substitute = {'substitute_id': select_substitute['barcode']}
                 self.favorites.append(substitute)            # Temporarily add to the list for insertion in the database
                 print(conf.SPACE_ADJUST, " |*** Ajout du produit ***| ", '\n', conf.SPACE_ADJUST,
@@ -131,7 +136,8 @@ class Main:
                       "|-Site internet:", select_substitute['web_site'], '\n', conf.SPACE_ADJUST,
                       "|*** Successful ***|", '\n', '\n',
                       "|Contenu du casier favoris: ", '\n', '\n', self.favorites, '\n', '\n')
-                self.choice_substitute_action(select_category, select_product)
+                # -tc- retour à choice_substitute, et non choice_substitute_action
+                self.choice_substitute(select_category, select_product)
 
             elif user == 'N':
                 print("|Contenu du casier favoris: ", '\n', '\n', self.favorites, '\n', '\n')
@@ -142,7 +148,7 @@ class Main:
             elif user == 'H':
                 self.home_menu()
             elif user == 'Q':
-                quit()
+                self.quit()
 
     def add_favorites(self, object):
         pass
@@ -163,6 +169,10 @@ class Main:
         self.db = rec.Database(f"mysql+mysqlconnector://{conf.USER}:{conf.PASSWORD}@localhost/"
                                f"{conf.DATABASE}?charset=utf8mb4")
         return self.db
+
+    # -tc- ajouter une méthode quit()
+    def quit(self):
+        print("Au revoir")
 
 
 def main():

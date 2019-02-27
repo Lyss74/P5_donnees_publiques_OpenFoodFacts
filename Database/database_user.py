@@ -11,11 +11,14 @@ class DataBaseUser:
         """ Just share the connection for MySQL """
         self.db = db
 
+    # -tc- On veux récupérer les infos des produits et substituts également, pas
+    # -tc- seulement les codes barre. Faire un jointure
     def get_favorite_table(self):
         """ Control in the tables """
         favorites = self.db.query("""
                                 SELECT * FROM PurBeurre.Favorites;
                              """,  fetchall=True).as_dict()
+        # -tc- Si pas de favoris, favorites sera une liste vide, pas égale à 0
         if favorites == 0:
             print("Aucun produit trouvè")
         return favorites
@@ -47,6 +50,19 @@ class DataBaseUser:
         #         return [(i, p['name_product'], p['grade'], p['barcode']) for i, p in enumerate(prod)]
 
         return prod
+
+    # -tc- pour l'insertion d'un favori
+    def add_into_favorites(self, product, substitute):
+        """Inserts the selected product and substitute into the Favorites table in the database."""
+        product_favorite = self.db.query("""
+            INSERT INTO Favorites (
+            (product_id, substitute_id) 
+            VALUES
+            (:product_id, :substitute_id)""", 
+            product_id=product['barcode'], substitute_id=substitute['barcode'], 
+            fetchall=True
+        ).as_dict()
+
 
     def insert_product(self, object_1, object_2):
         """ Inserts the selected product (s) into the favorites table in the database """
